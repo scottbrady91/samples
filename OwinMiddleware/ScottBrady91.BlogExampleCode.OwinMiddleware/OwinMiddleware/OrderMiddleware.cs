@@ -25,7 +25,7 @@
             context.Authentication.SignIn(id);
 
             // send file
-            context.Response.ContentType = @"image/png";
+            context.Response.ContentType = @"image/jpeg";
             await context.Response.SendFileAsync(@"~/img/teapot.jpg");
         }
     }
