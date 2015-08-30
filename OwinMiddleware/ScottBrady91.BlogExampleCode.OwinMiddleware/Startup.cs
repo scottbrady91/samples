@@ -6,6 +6,8 @@ using ScottBrady91.BlogExampleCode.OwinMiddleware;
 
 namespace ScottBrady91.BlogExampleCode.OwinMiddleware
 {
+    using Microsoft.Owin.Security.Cookies;
+
     using Owin;
 
     using ScottBrady91.BlogExampleCode.OwinMiddleware.OwinMiddleware;
@@ -16,9 +18,13 @@ namespace ScottBrady91.BlogExampleCode.OwinMiddleware
     {
         public void Configuration(IAppBuilder app)
         {
+            app.UseCookieAuthentication(new CookieAuthenticationOptions { AuthenticationType = "cookie" });
+            
             //app.Use<TeapotMiddleware>();
             //app.Use(typeof(TeapotMiddleware));
             app.UseTeapotMiddleware(new TeapotOptions { Biscuit = "Hobnob" });
+
+            app.UseOrderMiddleware();
         }
     }
 }

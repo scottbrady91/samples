@@ -26,7 +26,7 @@
         {
             context.Response.Cookies.Append("Biscuit", this.options.Biscuit);
             context.Response.StatusCode = 418;
-            // await this.Next.Invoke(context);
+            await this.Next.Invoke(context);
         }
     }
 }

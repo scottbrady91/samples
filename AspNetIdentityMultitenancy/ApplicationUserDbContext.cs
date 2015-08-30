@@ -1,4 +1,4 @@
-﻿namespace QuickAndEasyAspNetIdentityMultitenanc.Identity
+﻿namespace QuickAndEasyAspNetIdentityMultitenancy.Identity
 {
     using System;
     using System.Collections.Generic;
