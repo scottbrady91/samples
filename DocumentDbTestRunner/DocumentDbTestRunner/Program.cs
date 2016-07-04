@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -42,6 +43,9 @@ namespace DocumentDbTestRunner
             Console.WriteLine("4 - Read Document");
             Console.WriteLine("5 - Query Documents Synchronously");
             Console.WriteLine("6 - Query Documents Asynchronously");
+            Console.WriteLine("7 - Update Document");
+            Console.WriteLine("8 - Upsert Document");
+            Console.WriteLine("9 - Delete Document");
 
             Console.WriteLine("0 - Clean And Exit");
 
@@ -67,6 +71,15 @@ namespace DocumentDbTestRunner
                         break;
                     case "6":
                         QueryDocumentsAsync().Wait();
+                        break;
+                    case "7":
+                        UpdateDocument().Wait();
+                        break;
+                    case "8":
+                        UpsertDocument().Wait();
+                        break;
+                    case "9":
+                        DeleteDocument().Wait();
                         break;
                     case "0":
                         Cleanup().Wait();
@@ -195,6 +208,52 @@ namespace DocumentDbTestRunner
             
             stopwatch.Stop();
             Console.WriteLine($"Completed in {stopwatch.ElapsedMilliseconds}ms");
+        }
+
+        private static async Task UpdateDocument()
+        {
+            await
+                client.ReplaceDocumentAsync(
+                    UriFactory.CreateDocumentUri(DatabaseId, CollectionId, "Getting Started with the Azure DocumentDB .NET SDK"),
+                    new Post
+                    {
+                        Title = "Getting Started with the Azure DocumentDB .NET SDK",
+                        Category = "Azure",
+                        Tags =
+                            new List<string>
+                            {
+                                "Azure",
+                                "DocumentDB",
+                                "NoSQL",
+                                DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)
+                            },
+                        PublishDate = new DateTime(2016, 7, 5)
+                    });
+        }
+
+        private static async Task UpsertDocument()
+        {
+            await client.UpsertDocumentAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new Post
+            {
+                Title = "Getting Started with the Azure DocumentDB .NET SDK",
+                Category = "Azure",
+                Tags =
+                    new List<string>
+                    {
+                        "Azure",
+                        "DocumentDB",
+                        "NoSQL",
+                        DateTime.UtcNow.ToString(CultureInfo.InvariantCulture) + " Upserted!"
+                    },
+                PublishDate = new DateTime(2016, 7, 5)
+            });
+        }
+
+        private static async Task DeleteDocument()
+        {
+            await
+                client.DeleteDocumentAsync(UriFactory.CreateDocumentUri(DatabaseId, CollectionId,
+                    "Getting Started with the Azure DocumentDB .NET SDK"));
         }
 
         private static async Task Cleanup()
