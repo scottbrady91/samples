@@ -46,6 +46,7 @@ namespace DocumentDbTestRunner
             Console.WriteLine("7 - Update Document");
             Console.WriteLine("8 - Upsert Document");
             Console.WriteLine("9 - Delete Document");
+            Console.WriteLine("x - Stored Procedure");
 
             Console.WriteLine("0 - Clean And Exit");
 
@@ -80,6 +81,9 @@ namespace DocumentDbTestRunner
                         break;
                     case "9":
                         DeleteDocument().Wait();
+                        break;
+                    case "x":
+                        StoredProc().Wait();
                         break;
                     case "0":
                         Cleanup().Wait();
@@ -193,7 +197,7 @@ namespace DocumentDbTestRunner
 
             do
             {
-                var queryable = client.CreateDocumentQuery<Post>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = 1, RequestContinuation = continuationToken})
+                var queryable = client.CreateDocumentQuery<Post>(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId), new FeedOptions { MaxItemCount = 1, RequestContinuation = continuationToken })
                       .Where(x => x.Category == "Azure").AsDocumentQuery();
 
                 var feedResponse = await queryable.ExecuteNextAsync<Post>();
@@ -205,7 +209,7 @@ namespace DocumentDbTestRunner
                 }
 
             } while (continuationToken != null);
-            
+
             stopwatch.Stop();
             Console.WriteLine($"Completed in {stopwatch.ElapsedMilliseconds}ms");
         }
@@ -247,6 +251,32 @@ namespace DocumentDbTestRunner
                     },
                 PublishDate = new DateTime(2016, 7, 5)
             });
+        }
+
+        private static async Task StoredProc()
+        {
+            const string function = @"function(id) {
+    var context = getContext();
+    var collection = context.getCollection();
+    var collectionLink = collection.getSelfLink();
+    var response = context.getResponse();
+
+    var query = 'SELECT * FROM x WHERE x.id = ""' + id + '""';
+
+    collection.queryDocuments(collectionLink, query, { }, function(err, documents) {
+        if(!documents || !documents.length) response.setBody('No documents were found.');
+        else response.setBody(JSON.stringify(documents));
+    });
+}";
+
+            await client.UpsertStoredProcedureAsync(UriFactory.CreateDocumentCollectionUri(DatabaseId, CollectionId),
+                new StoredProcedure {Id = "TestReadStoredProc", Body = function});
+
+            var response = await client.ExecuteStoredProcedureAsync<string>(UriFactory.CreateStoredProcedureUri(DatabaseId, CollectionId,
+                "TestReadStoredProc"), "Getting Started with the Azure DocumentDB .NET SDK");
+
+            var posts = JsonConvert.DeserializeObject<List<Post>>(response.Response);
+            Console.WriteLine($"Found {posts.Count}");
         }
 
         private static async Task DeleteDocument()
