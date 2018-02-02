@@ -44,7 +44,7 @@ namespace ScottBrady91.BlogExampleCode.EcdsaJwtSigning
 
             return ECDsa.Create(new ECParameters
             {
-                Curve = ECCurve.CreateFromFriendlyName("secp256r1"),
+                Curve = ECCurve.NamedCurves.nistP256,
                 D = privKeyInt.ToByteArrayUnsigned(),
                 Q = new ECPoint
                 {
