@@ -38,9 +38,9 @@ namespace ScottBrady91.BlogExampleCode.EcdsaJwtSigning
         {
             var privKeyInt = new Org.BouncyCastle.Math.BigInteger(+1, key);
             var parameters = SecNamedCurves.GetByName("secp256r1");
-            var qa = parameters.G.Multiply(privKeyInt);
-            var pubKeyX = qa.Normalize().XCoord.ToBigInteger().ToByteArrayUnsigned();
-            var pubKeyY = qa.Normalize().YCoord.ToBigInteger().ToByteArrayUnsigned();
+            var ecPoint = parameters.G.Multiply(privKeyInt);
+            var privKeyX = ecPoint.Normalize().XCoord.ToBigInteger().ToByteArrayUnsigned();
+            var privKeyY = ecPoint.Normalize().YCoord.ToBigInteger().ToByteArrayUnsigned();
 
             return ECDsa.Create(new ECParameters
             {
@@ -48,24 +48,24 @@ namespace ScottBrady91.BlogExampleCode.EcdsaJwtSigning
                 D = privKeyInt.ToByteArrayUnsigned(),
                 Q = new ECPoint
                 {
-                    X = pubKeyX,
-                    Y = pubKeyY
+                    X = privKeyX,
+                    Y = privKeyY
                 }
             });
         }
 
         private static ECDsa LoadPublicKey(byte[] key)
         {
-            var x = key.Skip(1).Take(32).ToArray();
-            var y = key.Skip(33).ToArray();
+            var pubKeyX = key.Skip(1).Take(32).ToArray();
+            var pubKeyY = key.Skip(33).ToArray();
 
             return ECDsa.Create(new ECParameters
             {
-                Curve = ECCurve.CreateFromFriendlyName("secp256r1"),
+                Curve = ECCurve.NamedCurves.nistP256,
                 Q = new ECPoint
                 {
-                    X = x,
-                    Y = y
+                    X = pubKeyX,
+                    Y = pubKeyY
                 }
             });
         }
