@@ -47,8 +47,8 @@ namespace ScottBrady91.BlogExampleCode.RsaPssJwtSigning
                 new TokenValidationParameters
                 {
                     ValidIssuer = descriptor.Issuer, // "me"
-                    ValidAudience = descriptor.Audience, // "you
-                    IssuerSigningKey = key
+                    ValidAudience = descriptor.Audience, // "you"
+                    IssuerSigningKey = new RsaSecurityKey(key.Rsa.ExportParameters(false)) // public key
                 },
                 out SecurityToken parsedToken);
 
