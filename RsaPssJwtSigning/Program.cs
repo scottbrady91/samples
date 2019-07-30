@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
 
@@ -10,7 +10,7 @@ namespace ScottBrady91.BlogExampleCode.RsaPssJwtSigning
 {
     public class Program
     {
-        private static readonly JwtSecurityTokenHandler handler = new JwtSecurityTokenHandler();
+        private static readonly JsonWebTokenHandler handler = new JsonWebTokenHandler();
         private static readonly RsaSecurityKey key = new RsaSecurityKey(RSA.Create(2048));
         private static readonly DateTime now = DateTime.UtcNow;
 
@@ -34,7 +34,7 @@ namespace ScottBrady91.BlogExampleCode.RsaPssJwtSigning
 
         private static string CreatePssToken()
         {
-            var jwt = handler.CreateEncodedJwt(descriptor);
+            var jwt = handler.CreateToken(descriptor);
             Console.WriteLine(jwt);
 
             return jwt;
@@ -42,17 +42,15 @@ namespace ScottBrady91.BlogExampleCode.RsaPssJwtSigning
 
         private static void ValidatePssToken(string jwt)
         {
-            var claimsPrincipal = handler.ValidateToken(
-                jwt,
+            var result = handler.ValidateToken(jwt,
                 new TokenValidationParameters
                 {
                     ValidIssuer = descriptor.Issuer, // "me"
                     ValidAudience = descriptor.Audience, // "you"
                     IssuerSigningKey = new RsaSecurityKey(key.Rsa.ExportParameters(false)) // public key
-                },
-                out SecurityToken parsedToken);
+                });
 
-            if (!claimsPrincipal.Identity.IsAuthenticated) throw new Exception("It's all gone wrong");
+            if (!result.IsValid) throw new Exception("It's all gone wrong");
             Console.WriteLine("Token Validated!");
         }
 
@@ -61,8 +59,8 @@ namespace ScottBrady91.BlogExampleCode.RsaPssJwtSigning
         {
             descriptor.SigningCredentials = new SigningCredentials(key, "RS256");
 
-            var token1 = handler.CreateEncodedJwt(descriptor);
-            var token2 = handler.CreateEncodedJwt(descriptor);
+            var token1 = handler.CreateToken(descriptor);
+            var token2 = handler.CreateToken(descriptor);
 
             Assert.Equal(token1, token2);
         }
@@ -72,8 +70,8 @@ namespace ScottBrady91.BlogExampleCode.RsaPssJwtSigning
         {
             descriptor.SigningCredentials = new SigningCredentials(key, "PS256");
 
-            var token1 = handler.CreateEncodedJwt(descriptor);
-            var token2 = handler.CreateEncodedJwt(descriptor);
+            var token1 = handler.CreateToken(descriptor);
+            var token2 = handler.CreateToken(descriptor);
 
             Assert.NotEqual(token1, token2);
         }
