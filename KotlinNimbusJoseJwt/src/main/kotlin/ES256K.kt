@@ -12,7 +12,7 @@ import java.time.Instant
 import java.util.*
 
 fun main() {
-    // create EC Key
+    // create EC key
     val key: ECKey = ECKeyGenerator(Curve.P_256K)
         .keyID("123")
         .generate()

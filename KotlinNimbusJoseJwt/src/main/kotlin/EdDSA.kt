@@ -12,10 +12,12 @@ import java.time.Instant
 import java.util.*
 
 fun main() {
+    // create key
     val key: OctetKeyPair = OctetKeyPairGenerator(Curve.Ed25519)
         .keyID("123")
         .generate()
 
+    // create signed JWT
     val header = JWSHeader.Builder(JWSAlgorithm.EdDSA)
         .type(JOSEObjectType.JWT)
         .keyID(key.keyID)
@@ -32,7 +34,6 @@ fun main() {
 
     val jwt: String = signedJWT.serialize()
     println(jwt)
-
 
     // validate signature (and only signature)
     val isValid: Boolean = SignedJWT
