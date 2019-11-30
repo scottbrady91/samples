@@ -8,37 +8,20 @@ import com.nimbusds.jose.jwk.ECKey
 import com.nimbusds.jose.jwk.gen.ECKeyGenerator
 import com.nimbusds.jwt.JWTClaimsSet
 import com.nimbusds.jwt.SignedJWT
-import java.security.interfaces.ECPrivateKey
 import java.time.Instant
 import java.util.*
 
 fun main() {
     // create EC Key
-    val key: ECKey = generateECKey("123")
+    val key: ECKey = ECKeyGenerator(Curve.P_256K)
+        .keyID("123")
+        .generate()
 
     // create signed JWT
-    val jwt: String = createJws(key.keyID, key.toECPrivateKey())
-    println(jwt)
-
-    // validate signature (and only signature)
-    val isValid: Boolean = SignedJWT
-        .parse(jwt)
-        .verify(ECDSAVerifier(key.toECPublicKey()))
-    println("Valid signature: $isValid")
-}
-
-fun generateECKey(keyID: String): ECKey {
-    return ECKeyGenerator(Curve.P_256K)
-        .keyID(keyID)
-        .generate()
-}
-
-fun createJws(keyID: String, key: ECPrivateKey): String {
     val header = JWSHeader.Builder(JWSAlgorithm.ES256K)
         .type(JOSEObjectType.JWT)
-        .keyID(keyID)
+        .keyID(key.keyID)
         .build();
-
     val payload = JWTClaimsSet.Builder()
         .issuer("me")
         .audience("you")
@@ -47,6 +30,14 @@ fun createJws(keyID: String, key: ECPrivateKey): String {
         .build()
 
     val signedJWT = SignedJWT(header, payload)
-    signedJWT.sign(ECDSASigner(key))
-    return signedJWT.serialize()
+    signedJWT.sign(ECDSASigner(key.toECPrivateKey()))
+
+    val jwt: String = signedJWT.serialize()
+    println(jwt)
+
+    // validate signature (and only signature)
+    val isValid: Boolean = SignedJWT
+        .parse(jwt)
+        .verify(ECDSAVerifier(key.toECPublicKey()))
+    println("Valid signature: $isValid")
 }
