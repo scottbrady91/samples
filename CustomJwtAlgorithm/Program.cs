@@ -29,12 +29,7 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
                 {
                     ValidIssuer = "me",
                     ValidAudience = "you",
-                    IssuerSigningKey = new BouncyCastleEcdsaSecurityKey
-                    {
-                        KeyId = "123",
-                        KeyParameters = new ECPublicKeyParameters(point, domainParams),
-                        CryptoProviderFactory = new CryptoProviderFactory {CustomCryptoProvider = new CustomCryptoProvider()}
-                    }
+                    IssuerSigningKey = new BouncyCastleEcdsaSecurityKey(new ECPublicKeyParameters(point, domainParams)) {KeyId = "123"}
                 });
 
             Console.WriteLine(result.IsValid);
@@ -47,7 +42,12 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
         
         public object Create(string algorithm, params object[] args)
         {
-            if (algorithm == "ES256K") return new CustomSignatureProvider(args[0] as BouncyCastleEcdsaSecurityKey, algorithm);
+            if (algorithm == "ES256K"
+                && args[0] is BouncyCastleEcdsaSecurityKey key)
+            {
+                return new CustomSignatureProvider(key, algorithm);
+            }
+
             throw new NotSupportedException();
         }
 
@@ -91,11 +91,18 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
 
     public class BouncyCastleEcdsaSecurityKey : AsymmetricSecurityKey
     {
-        public ECKeyParameters KeyParameters { get; set; }
+        public BouncyCastleEcdsaSecurityKey(ECKeyParameters keyParameters)
+        {
+            KeyParameters = keyParameters;
+            CryptoProviderFactory = new CryptoProviderFactory {CustomCryptoProvider = new CustomCryptoProvider()};
+        }
+
+        public ECKeyParameters KeyParameters { get; }
         public override int KeySize { get; }
 
         [Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
         public override bool HasPrivateKey => KeyParameters.IsPrivate;
-        public override PrivateKeyStatus PrivateKeyStatus => KeyParameters.IsPrivate ? PrivateKeyStatus.Exists : PrivateKeyStatus.Unknown;
+
+        public override PrivateKeyStatus PrivateKeyStatus => KeyParameters.IsPrivate ? PrivateKeyStatus.Exists : PrivateKeyStatus.DoesNotExist;
     }
 }
