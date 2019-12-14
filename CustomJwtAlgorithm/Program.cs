@@ -32,7 +32,7 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
                     IssuerSigningKey = new BouncyCastleEcdsaSecurityKey(new ECPublicKeyParameters(point, domainParams)) {KeyId = "123"}
                 });
 
-            Console.WriteLine(result.IsValid);
+            Console.WriteLine($"Is signature valid: {result.IsValid}");
         }
     }
 
@@ -58,7 +58,8 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
         }
     }
 
-    public class CustomSignatureProvider : SignatureProvider {
+    public class CustomSignatureProvider : SignatureProvider 
+    {
         public CustomSignatureProvider(BouncyCastleEcdsaSecurityKey key, string algorithm) : base(key, algorithm) { }
 
         protected override void Dispose(bool disposing) { }
@@ -94,11 +95,11 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
         public BouncyCastleEcdsaSecurityKey(ECKeyParameters keyParameters)
         {
             KeyParameters = keyParameters;
-            CryptoProviderFactory = new CryptoProviderFactory {CustomCryptoProvider = new CustomCryptoProvider()};
+            CryptoProviderFactory.CustomCryptoProvider = new CustomCryptoProvider();
         }
 
         public ECKeyParameters KeyParameters { get; }
-        public override int KeySize { get; }
+        public override int KeySize => throw new NotImplementedException();
 
         [Obsolete("HasPrivateKey method is deprecated, please use PrivateKeyStatus.")]
         public override bool HasPrivateKey => KeyParameters.IsPrivate;
