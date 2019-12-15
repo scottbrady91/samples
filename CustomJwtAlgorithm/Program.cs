@@ -17,9 +17,13 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
             X9ECParameters secp256k1 = ECNamedCurveTable.GetByName("secp256k1");
             ECDomainParameters domainParams = new ECDomainParameters(secp256k1.Curve, secp256k1.G, secp256k1.N, secp256k1.H, secp256k1.GetSeed());
 
+            const string d = "e8HThqO0wR_Qw4pNIb80Cs0mYuCSqT6BSQj-o-tKTrg";
+            const string x = "A3hkIubgDggcoHzmVdXIm11gZ7UMaOa71JVf1eCifD8";
+            const string y = "ejpRwmCvNMdXMOjR2DodOt09OLPgNUrcKA9hBslaFU0";
+
             var point = secp256k1.Curve.CreatePoint(
-                new BigInteger(1, Base64UrlEncoder.DecodeBytes("A3hkIubgDggcoHzmVdXIm11gZ7UMaOa71JVf1eCifD8")),
-                new BigInteger(1, Base64UrlEncoder.DecodeBytes("ejpRwmCvNMdXMOjR2DodOt09OLPgNUrcKA9hBslaFU0")));
+                new BigInteger(1, Base64UrlEncoder.DecodeBytes(x)),
+                new BigInteger(1, Base64UrlEncoder.DecodeBytes(y)));
             
             var handler = new JsonWebTokenHandler();
 
@@ -28,7 +32,7 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
                 Issuer = "me",
                 Audience = "you",
                 SigningCredentials = new SigningCredentials(new BouncyCastleEcdsaSecurityKey(
-                    new ECPrivateKeyParameters(new BigInteger(1, Base64UrlEncoder.DecodeBytes("e8HThqO0wR_Qw4pNIb80Cs0mYuCSqT6BSQj-o-tKTrg")), domainParams)), "ES256K")
+                    new ECPrivateKeyParameters(new BigInteger(1, Base64UrlEncoder.DecodeBytes(d)), domainParams)) {KeyId = "123"}, "ES256K")
             });
             Console.WriteLine(token);
 
