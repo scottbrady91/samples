@@ -78,7 +78,7 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
 
         public override byte[] Sign(byte[] input)
         {
-            var ecDsaSigner = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
+            var ecDsaSigner = new ECDsaSigner();
             BouncyCastleEcdsaSecurityKey key = Key as BouncyCastleEcdsaSecurityKey;
             
             ecDsaSigner.Init(true, key.KeyParameters);
@@ -103,7 +103,7 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
 
         public override bool Verify(byte[] input, byte[] signature)
         {
-            var ecDsaSigner = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
+            var ecDsaSigner = new ECDsaSigner();
             BouncyCastleEcdsaSecurityKey key = Key as BouncyCastleEcdsaSecurityKey;
 
             ecDsaSigner.Init(false, key.KeyParameters);
