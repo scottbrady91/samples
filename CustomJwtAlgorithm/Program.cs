@@ -19,17 +19,28 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
             ECDomainParameters domainParams = new ECDomainParameters(secp256k1.Curve, secp256k1.G, secp256k1.N, secp256k1.H, secp256k1.GetSeed());
 
             var point = secp256k1.Curve.CreatePoint(
-                new BigInteger(1, Base64UrlEncoder.DecodeBytes("qTx9ZWn9A6eCT0AXbFAY7kPycIsMDix7ywNg9ALAz3U")),
-                new BigInteger(1, Base64UrlEncoder.DecodeBytes("6c373eX_qcg4AYlLD5obBAabYrUNd1WVJbTtwUhllFw")));
+                new BigInteger(1, Base64UrlEncoder.DecodeBytes("A3hkIubgDggcoHzmVdXIm11gZ7UMaOa71JVf1eCifD8")),
+                new BigInteger(1, Base64UrlEncoder.DecodeBytes("ejpRwmCvNMdXMOjR2DodOt09OLPgNUrcKA9hBslaFU0")));
             
             var handler = new JsonWebTokenHandler();
-            var result = handler.ValidateToken(
-                "eyJraWQiOiIxMjMiLCJhbGciOiJFUzI1NksifQ.eyJhdWQiOiJ5b3UiLCJzdWIiOiJib2IiLCJpc3MiOiJtZSIsImV4cCI6NjE1MzgwNTQ0MDB9.lgIe5Ca_skeih7vpZBSU-NrVPza4eG0rjv_z-vTIzyXPRsuxAERHbIGs4VtKFs0CZo3Y-v0mVA9fsxZVgwUg9Q",
+
+            var token = handler.CreateToken(new SecurityTokenDescriptor
+            {
+                Issuer = "me",
+                Audience = "you",
+                SigningCredentials = new SigningCredentials(new BouncyCastleEcdsaSecurityKey(
+                    new ECPrivateKeyParameters(new BigInteger(1, Base64UrlEncoder.DecodeBytes("e8HThqO0wR_Qw4pNIb80Cs0mYuCSqT6BSQj-o-tKTrg")), domainParams)), "ES256K")
+            });
+            Console.WriteLine(token);
+
+             var result = handler.ValidateToken(
+                token,
                 new TokenValidationParameters
                 {
                     ValidIssuer = "me",
                     ValidAudience = "you",
-                    IssuerSigningKey = new BouncyCastleEcdsaSecurityKey(new ECPublicKeyParameters(point, domainParams)) {KeyId = "123"}
+                    IssuerSigningKey = new BouncyCastleEcdsaSecurityKey(
+                        new ECPublicKeyParameters(point, domainParams)) {KeyId = "123"}
                 });
 
             Console.WriteLine($"Is signature valid: {result.IsValid}");
@@ -60,13 +71,34 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
 
     public class CustomSignatureProvider : SignatureProvider 
     {
-        public CustomSignatureProvider(BouncyCastleEcdsaSecurityKey key, string algorithm) : base(key, algorithm) { }
+        public CustomSignatureProvider(BouncyCastleEcdsaSecurityKey key, string algorithm) 
+            : base(key, algorithm) { }
 
         protected override void Dispose(bool disposing) { }
 
         public override byte[] Sign(byte[] input)
         {
-            throw new NotImplementedException();
+            var ecDsaSigner = new ECDsaSigner(new HMacDsaKCalculator(new Sha256Digest()));
+            BouncyCastleEcdsaSecurityKey key = Key as BouncyCastleEcdsaSecurityKey;
+            
+            ecDsaSigner.Init(true, key.KeyParameters);
+            
+            byte[] hashedInput;
+            using (var hasher = SHA256.Create())
+            {
+                hashedInput = hasher.ComputeHash(input);
+            }
+
+            var output = ecDsaSigner.GenerateSignature(hashedInput);
+            
+            var r = output[0].ToByteArrayUnsigned();
+            var s = output[1].ToByteArrayUnsigned();
+
+            var signature = new byte[r.Length + s.Length];
+            r.CopyTo(signature, 0);
+            s.CopyTo(signature, r.Length);
+
+            return signature;
         }
 
         public override bool Verify(byte[] input, byte[] signature)
@@ -77,7 +109,6 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
             ecDsaSigner.Init(false, key.KeyParameters);
 
             byte[] hashedInput;
-
             using (var hasher = SHA256.Create())
             {
                 hashedInput = hasher.ComputeHash(input);
