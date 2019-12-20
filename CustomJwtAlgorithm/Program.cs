@@ -52,24 +52,25 @@ namespace ScottBrady91.BlogExampleCode.CustomJwtAlgorithm
 
     public class CustomCryptoProvider : ICryptoProvider
     {
-        public bool IsSupportedAlgorithm(string algorithm, params object[] args) => algorithm == "ES256K";
-        
-        public object Create(string algorithm, params object[] args)
-        {
-            if (algorithm == "ES256K"
-                && args[0] is BouncyCastleEcdsaSecurityKey key)
-            {
-                return new CustomSignatureProvider(key, algorithm);
-            }
+        public bool IsSupportedAlgorithm(string algorithm, params object[] args) =>
+            IsES256K(algorithm) && IsBouncyCastleEcdsaSecurityKey(args, out var _);
 
-            throw new NotSupportedException();
-        }
+        public object Create(string algorithm, params object[] args) =>
+            IsES256K(algorithm) && IsBouncyCastleEcdsaSecurityKey(args, out var key) ?
+                new CustomSignatureProvider(key, algorithm) :
+                throw new NotSupportedException();
 
         public void Release(object cryptoInstance)
         {
             if (cryptoInstance is IDisposable disposableObject)
                 disposableObject.Dispose();
         }
+
+        private static bool IsES256K(string algorithm) =>
+            String.Equals(algorithm, "ES256K", StringComparison.OrdinalIgnoreCase);
+
+        private static bool IsBouncyCastleEcdsaSecurityKey(object[] args, out BouncyCastleEcdsaSecurityKey key) =>
+            (key = args.FirstOrDefault() as BouncyCastleEcdsaSecurityKey) is object;
     }
 
     public class CustomSignatureProvider : SignatureProvider 
