@@ -28,7 +28,7 @@ namespace IdentityServer
             new[]
             {
                 // old hybrid settings
-                new Client
+                /*new Client
                 {
                     ClientId = "mvc.owin",
                     ClientName = "MVC Client",
@@ -36,6 +36,17 @@ namespace IdentityServer
                     ClientSecrets = {new Secret("secret".Sha256())},
                     RedirectUris = {"http://localhost:5001/"},
                     AllowedScopes = {"openid", "profile", "api1"}
+                }*/
+                new Client
+                {
+                    ClientId = "mvc.owin",
+                    ClientName = "MVC Client",
+                    AllowedGrantTypes = GrantTypes.Code,
+                    ClientSecrets = {new Secret("secret".Sha256())},
+                    RedirectUris = {"http://localhost:5001/"},
+                    AllowedScopes = {"openid", "profile", "api1"},
+                    AllowPlainTextPkce = false,
+                    RequirePkce = true
                 }
             };
     }
