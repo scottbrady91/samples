@@ -1,6 +1,7 @@
 {
     "name": "tailwindutilitieswithbootstrap",
     "dependencies": {
+        "@fullhuman/postcss-purgecss": "^2.3.0",
         "autoprefixer": "^9.8.4",
         "gulp": "^4.0.2",
         "gulp-concat": "^2.6.1",
