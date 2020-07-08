@@ -7,5 +7,9 @@ module.exports = {
             'lg': '992px',
             'xl': '1200px',
         }
-    }
+    },
+    // purge: {
+    //     enabled: true,
+    //     content: ['./*.html']
+    // }
 }
