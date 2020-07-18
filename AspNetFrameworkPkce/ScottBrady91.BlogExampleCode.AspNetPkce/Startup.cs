@@ -113,7 +113,7 @@ namespace ScottBrady91.BlogExampleCode.AspNetPkce
                     Secure = n.Request.IsSecure
                 };
 
-                n.Options.CookieManager.DeleteCookie(n.OwinContext, "cv", cookieOptions);
+                n.Options.CookieManager.DeleteCookie(n.OwinContext, key, cookieOptions);
             }
 
             var cookieProperties = n.Options.StateDataFormat.Unprotect(Encoding.UTF8.GetString(Convert.FromBase64String(codeVerifierCookie)));
