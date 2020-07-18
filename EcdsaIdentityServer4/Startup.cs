@@ -1,6 +1,10 @@
-﻿using IdentityServerHost.Quickstart.UI;
+﻿using System;
+using System.Security.Cryptography;
+using IdentityServer4;
+using IdentityServerHost.Quickstart.UI;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 
 namespace EcdsaIdentityServer4
 {
@@ -16,19 +20,20 @@ namespace EcdsaIdentityServer4
                     options.Events.RaiseInformationEvents = true;
                     options.Events.RaiseFailureEvents = true;
                     options.Events.RaiseSuccessEvents = true;
-
-                    // see https://identityserver4.readthedocs.io/en/latest/topics/resources.html
-                    options.EmitStaticAudienceClaim = true;
                 })
+                .AddInMemoryIdentityResources(Config.IdentityResources)
+                .AddInMemoryApiScopes(Config.ApiScopes)
+                .AddInMemoryClients(Config.Clients)
                 .AddTestUsers(TestUsers.Users);
 
-            // in-memory, code config
-            builder.AddInMemoryIdentityResources(Config.IdentityResources);
-            builder.AddInMemoryApiScopes(Config.ApiScopes);
-            builder.AddInMemoryClients(Config.Clients);
-
-            // not recommended for production - you need to store your key material somewhere secure
-            builder.AddDeveloperSigningCredential();
+            var pemBytes = Convert.FromBase64String(
+                @"MHcCAQEEIB2EbKgBGbRxWTtWheDgaNw3P7TsSsMoWloU4NHO3MWYoAoGCCqGSM49
+AwEHoUQDQgAEVGVVEnzMZnTv/8Jk0/WlFs9poYA7XqI7ITHH78OPenhGS02GBjXM
+WV/akdaWBgIyUP8/86kJ2KRyuHR4c/jIuA==");
+            
+            var ecdsa = ECDsa.Create();
+            ecdsa.ImportECPrivateKey(pemBytes, out _);
+            builder.AddSigningCredential(new ECDsaSecurityKey(ecdsa){KeyId = "ef208a01ef43406f833b267023766550"}, IdentityServerConstants.ECDsaSigningAlgorithm.ES256);
         }
 
         public void Configure(IApplicationBuilder app)
