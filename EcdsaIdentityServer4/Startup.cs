@@ -22,6 +22,7 @@ namespace EcdsaIdentityServer4
                     options.Events.RaiseSuccessEvents = true;
                 })
                 .AddInMemoryIdentityResources(Config.IdentityResources)
+                .AddInMemoryApiResources(Config.ApiResources)
                 .AddInMemoryApiScopes(Config.ApiScopes)
                 .AddInMemoryClients(Config.Clients)
                 .AddTestUsers(TestUsers.Users);
@@ -33,7 +34,10 @@ WV/akdaWBgIyUP8/86kJ2KRyuHR4c/jIuA==");
             
             var ecdsa = ECDsa.Create();
             ecdsa.ImportECPrivateKey(pemBytes, out _);
-            builder.AddSigningCredential(new ECDsaSecurityKey(ecdsa){KeyId = "ef208a01ef43406f833b267023766550"}, IdentityServerConstants.ECDsaSigningAlgorithm.ES256);
+            var securityKey = new ECDsaSecurityKey(ecdsa) {KeyId = "ef208a01ef43406f833b267023766550"};
+
+            builder.AddSigningCredential(securityKey, IdentityServerConstants.ECDsaSigningAlgorithm.ES256);
+            builder.AddSigningCredential(new RsaSecurityKey(RSA.Create()), IdentityServerConstants.RsaSigningAlgorithm.RS256);
         }
 
         public void Configure(IApplicationBuilder app)
