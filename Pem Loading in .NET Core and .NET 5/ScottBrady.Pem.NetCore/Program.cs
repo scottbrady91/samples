@@ -31,6 +31,8 @@ HCpBEdhlqGehYsNz3DpUM2PHRhzHZJB4Rg==";
             var key = ECDsa.Create();
             key.ImportECPrivateKey(Convert.FromBase64String(EccPem), out _);
             Console.WriteLine($"Key loaded with key size of '{key.KeySize}'");
+
+            var certWithPrivateKey = cert.CopyWithPrivateKey(key);
         }
     }
 }
