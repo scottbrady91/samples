@@ -23,11 +23,11 @@ HCpBEdhlqGehYsNz3DpUM2PHRhzHZJB4Rg==";
         
         public static void Main()
         {
-            // parsing a cert from a PEM file. PEM lables have been stripped
+            // parsing a cert from a PEM file. PEM labels have been stripped
             var cert = new X509Certificate2(Convert.FromBase64String(CertPem));
             Console.WriteLine($"Certificate loaded with subject '{cert.Subject}' and a key type of '{cert.PublicKey.Oid.FriendlyName}'");
 
-            // parsing an ECC key from a PEM file. PEM lables have been stripped
+            // parsing an ECC key from a PEM file. PEM labels have been stripped
             var key = ECDsa.Create();
             key.ImportECPrivateKey(Convert.FromBase64String(EccPem), out _);
             Console.WriteLine($"Key loaded with key size of '{key.KeySize}'");
