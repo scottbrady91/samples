@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using Sodium;
@@ -20,9 +19,8 @@ namespace ScottBrady.Samples.XChaCha20Poly1305
 
             const string message = "Got more soul than a sock with a hole";
             
-            
-            
             UsingLibsodium(key, nonce, Encoding.UTF8.GetBytes(message));
+            UsingBouncyCastle(key, nonce, Encoding.UTF8.GetBytes(message));
         }
 
         /// <summary>
@@ -33,16 +31,24 @@ namespace ScottBrady.Samples.XChaCha20Poly1305
         {
             // crypto_aead_xchacha20poly1305_ietf_encrypt
             var ciphertext = SecretAeadXChaCha20Poly1305.Encrypt(plaintext, nonce, key);
+            Console.WriteLine($"Libsodium Ouput: {Convert.ToBase64String(ciphertext)}");
             
             // crypto_aead_xchacha20poly1305_ietf_decrypt
             var decyptedPlaintext = SecretAeadXChaCha20Poly1305.Decrypt(ciphertext, nonce, key);
-            Console.WriteLine($"Decrypted message: {Encoding.UTF8.GetString(decyptedPlaintext)}");
+            Console.WriteLine($"Libsodium Decrypted message: {Encoding.UTF8.GetString(decyptedPlaintext)}");
         }
 
-        // "Rolling your own crypto" with XChaCha20-Poly1305 in .NET
-        public static void UsingBouncyCastle()
+        
+        /// <summary>
+        /// "Rolling your own crypto" with XChaCha20-Poly1305 in .NET
+        /// </summary>
+        public static void UsingBouncyCastle(byte[] key, byte[] nonce, byte[] plaintext)
         {
+            var ciphertext = BouncyDancing.Encrypt(key, nonce, plaintext);
+            Console.WriteLine($"BouncyDancing Ouput: {Convert.ToBase64String(ciphertext)}");
             
+            var decyptedPlaintext = BouncyDancing.Decrypt(key, nonce, ciphertext);
+            Console.WriteLine($"BouncyDancing Decrypted message: {Encoding.UTF8.GetString(decyptedPlaintext)}");
         }
     }
 }
