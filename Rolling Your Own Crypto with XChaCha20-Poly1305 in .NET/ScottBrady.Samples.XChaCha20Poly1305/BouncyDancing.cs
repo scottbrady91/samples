@@ -8,40 +8,13 @@ namespace ScottBrady.Samples.XChaCha20Poly1305
 {
     public static class BouncyDancing
     {
-        public static byte[] Encrypt(byte[] key, byte[] nonce, byte[] plaintext, byte[] aad = null)
-        {
-            if (key.Length != 32) throw new ArgumentException("Key must be 32 bytes", nameof(key));
-            if (nonce.Length != 24) throw new ArgumentException("Nonce must be 24 bytes", nameof(nonce));
+        public static byte[] Encrypt(byte[] key, byte[] nonce, byte[] plaintext, byte[] aad = null) 
+            => XChaCha20Poly1305(true, key, nonce, plaintext, aad);
 
-            // subkey (hchacha20(key, nonce[0:15]))
-            var subkey = HChaCha20.CreateSubkey(key, nonce); // TODO: parse nonce bytes to pass through here instead
-            
-            // nonce (chacha20_nonce = "\x00\x00\x00\x00" + nonce[16:23])
-            var chaChaNonce = new byte[12];
-            Array.Copy(new byte[] {0, 0, 0, 0}, chaChaNonce, 4);
-            Array.Copy(nonce, 16, chaChaNonce, 4, 8);
+        public static byte[] Decrypt(byte[] key, byte[] nonce, byte[] ciphertext, byte[] aad = null) 
+            => XChaCha20Poly1305(false, key, nonce, ciphertext, aad);
 
-            // chacha20_encrypt(subkey, chacha20_nonce, plaintext, blk_ctr)
-            var ciphertext = new byte[plaintext.Length + 16];
-            var keyMaterial = new KeyParameter(subkey);
-            var parameters = new ParametersWithIV(keyMaterial, chaChaNonce);
-            
-            var chaCha20Poly1305 = new ChaCha20Poly1305();
-            chaCha20Poly1305.Init(true, parameters);
-            
-            // if aditional data present
-            if (aad != null)
-            {
-                chaCha20Poly1305.ProcessAadBytes(aad, 0, aad.Length);
-            }
-            
-            var len = chaCha20Poly1305.ProcessBytes(plaintext, 0, plaintext.Length, ciphertext, 0);
-            chaCha20Poly1305.DoFinal(ciphertext, len);
-
-            return ciphertext;
-        }
-
-        public static byte[] Decrypt(byte[] key, byte[] nonce, byte[] ciphertext, byte[] aad = null)
+        private static byte[] XChaCha20Poly1305(bool isEncryption, byte[] key, byte[] nonce, byte[] message, byte[] aad = null)
         {
             if (key.Length != 32) throw new ArgumentException("Key must be 32 bytes", nameof(key));
             if (nonce.Length != 24) throw new ArgumentException("Nonce must be 24 bytes", nameof(nonce));
@@ -55,20 +28,24 @@ namespace ScottBrady.Samples.XChaCha20Poly1305
             Array.Copy(nonce, 16, chaChaNonce, 4, 8);
             
             // chacha20_encrypt(subkey, chacha20_nonce, plaintext, blk_ctr)
-            var plaintext = new byte[ciphertext.Length - 16];
+            var outputLength = message.Length;
+            if (isEncryption) outputLength += 16;
+            else outputLength -= 16;
+            
+            var output = new byte[outputLength];
             var keyMaterial = new KeyParameter(subkey);
             var parameters = new ParametersWithIV(keyMaterial, chaChaNonce);
             
             var chaCha20Poly1305 = new ChaCha20Poly1305();
-            chaCha20Poly1305.Init(false, parameters);
+            chaCha20Poly1305.Init(isEncryption, parameters);
             
             // if aditional data present
             if (aad != null) chaCha20Poly1305.ProcessAadBytes(aad, 0, aad.Length);
 
-            var len = chaCha20Poly1305.ProcessBytes(ciphertext, 0, ciphertext.Length, plaintext, 0);
-            chaCha20Poly1305.DoFinal(plaintext, len);
+            var len = chaCha20Poly1305.ProcessBytes(message, 0, message.Length, output, 0);
+            chaCha20Poly1305.DoFinal(output, len);
 
-            return plaintext;
+            return output;
         }
 
         public static class HChaCha20
@@ -119,7 +96,7 @@ namespace ScottBrady.Samples.XChaCha20Poly1305
                 }
             }
 
-            private static uint[] ToUint32LittleEndian(byte[] bytes, int outputLength) // TODO: remove nonce size knowledge from here
+            private static uint[] ToUint32LittleEndian(byte[] bytes, int outputLength)
             {
                 var pos = 0;
                 var output = new uint[outputLength];
