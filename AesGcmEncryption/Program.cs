@@ -61,16 +61,16 @@ namespace AesGcmEncryption
         private static (byte[] ciphertext, byte[] nonce, byte[] tag) EncryptWithBouncyCastle(string plaintext, byte[] key)
         {
             const int nonceLength = 12; // in bytes
-            const int tagLenth = 16; // in bytes
+            const int tagLength = 16; // in bytes
             
             var nonce = new byte[nonceLength];
             RandomNumberGenerator.Fill(nonce);
             
             var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-            var bouncyCastleCiphertext = new byte[plaintextBytes.Length + tagLenth];
+            var bouncyCastleCiphertext = new byte[plaintextBytes.Length + tagLength];
             
             var cipher = new GcmBlockCipher(new AesEngine());
-            var parameters = new AeadParameters(new KeyParameter(key), tagLenth * 8, nonce);
+            var parameters = new AeadParameters(new KeyParameter(key), tagLength * 8, nonce);
             cipher.Init(true, parameters);
             
             var offset = cipher.ProcessBytes(plaintextBytes, 0, plaintextBytes.Length, bouncyCastleCiphertext, 0);
@@ -78,9 +78,9 @@ namespace AesGcmEncryption
 
             // Bouncy Castle includes the authentication tag in the ciphertext
             var ciphertext = new byte[plaintextBytes.Length];
-            var tag = new byte[tagLenth];
+            var tag = new byte[tagLength];
             Buffer.BlockCopy(bouncyCastleCiphertext, 0, ciphertext, 0, plaintextBytes.Length);
-            Buffer.BlockCopy(bouncyCastleCiphertext, plaintextBytes.Length, tag, 0, tagLenth);
+            Buffer.BlockCopy(bouncyCastleCiphertext, plaintextBytes.Length, tag, 0, tagLength);
 
             return (ciphertext, nonce, tag);
         }
