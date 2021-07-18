@@ -32,7 +32,7 @@ namespace EcdsaXmlSigning
             var cert = new CertificateRequest("CN=test", ecdsa, HashAlgorithmName.SHA256)
                 .CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-2), DateTimeOffset.UtcNow.AddDays(-2));
             var pubCert = new X509Certificate2(cert.Export(X509ContentType.Cert));
-            
+
             
             var signedXml = SignXml(xmlDoc.DocumentElement, cert, signingAlgorithm);
             xmlDoc.DocumentElement?.AppendChild(signedXml);
@@ -46,7 +46,7 @@ namespace EcdsaXmlSigning
         {
             // X509Certificate2.PrivateKey is being deprecated
             var key = (AsymmetricAlgorithm) cert.GetRSAPrivateKey() ?? cert.GetECDsaPrivateKey();
-
+            
             // set key, signing algorithm, and canonicalization method
             var signedXml = new SignedXml(xml) {SigningKey = key};
             signedXml.SignedInfo.SignatureMethod = signatureMethod;
@@ -121,14 +121,14 @@ namespace EcdsaXmlSigning
 
     public class EcdsaSignatureDeformatter : AsymmetricSignatureDeformatter
     {
-        private ECDsa ecdsaKey;
+        private ECDsa key;
 
-        public EcdsaSignatureDeformatter(ECDsa ecdsaKey) => this.ecdsaKey = ecdsaKey;
+        public EcdsaSignatureDeformatter(ECDsa key) => this.key = key;
 
-        public override void SetKey(AsymmetricAlgorithm key) => this.ecdsaKey = key as ECDsa;
+        public override void SetKey(AsymmetricAlgorithm key) => this.key = key as ECDsa;
         
         public override void SetHashAlgorithm(string strName) { }
 
-        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature) => ecdsaKey.VerifyHash(rgbHash, rgbSignature);
+        public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature) => key.VerifyHash(rgbHash, rgbSignature);
     }
 }
