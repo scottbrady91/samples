@@ -10,7 +10,7 @@ namespace EcdsaXmlSigning
     {
         public static void Main()
         {
-            const string xml = "<message>Just remember ALL CAPS when you spell the man name</message>";
+            const string xml = "<message><content>Just remember ALL CAPS when you spell the man name</content></message>";
             var xmlDoc = new XmlDocument {PreserveWhitespace = true};
             xmlDoc.LoadXml(xml);
             
