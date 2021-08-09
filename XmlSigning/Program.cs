@@ -4,15 +4,15 @@ using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
 using System.Xml;
 
-namespace EcdsaXmlSigning
+namespace XmlSigning
 {
     public class Program
     {
         public static void Main()
         {
-            const string xml = "<message><content>Just remember ALL CAPS when you spell the man name</content></message>";
-            var xmlDoc = new XmlDocument {PreserveWhitespace = true};
-            xmlDoc.LoadXml(xml);
+            const string text = "<message><content>Just remember ALL CAPS when you spell the man name</content></message>";
+            var xml = new XmlDocument {PreserveWhitespace = true, XmlResolver = null};
+            xml.LoadXml(text);
             
             // register custom signing algorithm
             CryptoConfig.AddAlgorithm(typeof(Ecdsa256SignatureDescription), "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
@@ -34,12 +34,12 @@ namespace EcdsaXmlSigning
             var pubCert = new X509Certificate2(cert.Export(X509ContentType.Cert));
 
             
-            var signedXml = SignXml(xmlDoc.DocumentElement, cert, signingAlgorithm);
-            xmlDoc.DocumentElement?.AppendChild(signedXml);
+            var signedXml = SignXml(xml.DocumentElement, cert, signingAlgorithm);
+            xml.DocumentElement?.AppendChild(signedXml);
             
-            Console.WriteLine(xmlDoc.OuterXml);
+            Console.WriteLine(xml.OuterXml);
             
-            Console.WriteLine("Valid signature? " + ValidateSignature(xmlDoc.DocumentElement, pubCert));
+            Console.WriteLine("Valid signature? " + ValidateSignature(xml.DocumentElement, pubCert));
         }
 
         private static XmlElement SignXml(XmlElement xml, X509Certificate2 cert, string signatureMethod)
@@ -64,8 +64,10 @@ namespace EcdsaXmlSigning
             keyInfo.AddClause(new KeyInfoX509Data(cert));
             signedXml.KeyInfo = keyInfo;*/
 
+            // create signature
             signedXml.ComputeSignature();
             
+            // get signature XML element
             return signedXml.GetXml();
         }
 
@@ -73,7 +75,12 @@ namespace EcdsaXmlSigning
         {
             var signedXml = new SignedXml(xml);
 
+            // double check the schema
+            // usually we would validate using XPath
             var signatureElement = xml.GetElementsByTagName("Signature");
+            if (signatureElement.Count != 1)
+                throw new InvalidOperationException("Too many signatures!");
+            
             signedXml.LoadXml((XmlElement) signatureElement[0]);
             
             // validate references here!
