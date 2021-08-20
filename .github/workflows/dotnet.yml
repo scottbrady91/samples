@@ -30,8 +30,8 @@ jobs:
       run: |
         dotnet nuget locals all --clear
     - name: Restore
-      run: dotnet restore EcdsaKeyLoading
+      run: dotnet restore .github/test.sln
     - name: Build
-      run: dotnet build EcdsaKeyLoading --no-restore
+      run: dotnet build .github/test.sln --no-restore
     - name: Test
-      run: dotnet test EcdsaKeyLoading --no-build --verbosity normal
+      run: dotnet test .github/test.sln --no-build --verbosity normal
