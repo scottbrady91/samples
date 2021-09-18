@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
@@ -11,9 +12,13 @@ namespace XmlSigning
         public static void Main()
         {
             const string text = "<message><content>Just remember ALL CAPS when you spell the man name</content></message>";
-            var xml = new XmlDocument {PreserveWhitespace = true, XmlResolver = null};
-            xml.LoadXml(text);
+            var xml = new XmlDocument {PreserveWhitespace = true};
             
+            // safe against both external entity attacks and billion laughs
+            using var stringReader = new StringReader(text);
+            using var xmlReader = XmlReader.Create(stringReader);
+            xml.Load(xmlReader);
+
             // register custom signing algorithm
             CryptoConfig.AddAlgorithm(typeof(Ecdsa256SignatureDescription), "http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
 
