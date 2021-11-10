@@ -54,11 +54,13 @@ namespace UmbracoBackofficeOidc
                                 options.ClientSecret = "secret";
 
                                 options.CallbackPath = "/signin-oidc";
-                                options.Scope.Add("email");
-
                                 options.ResponseType = "code";
                                 options.ResponseMode = "query";
                                 options.UsePkce = true;
+                                
+                                // get user identity
+                                options.Scope.Add("email");
+                                options.GetClaimsFromUserInfoEndpoint = true;
                             }),
                         providerOptions => providerOptions.Icon = "fa fa-openid"))
                 .AddWebsite()
