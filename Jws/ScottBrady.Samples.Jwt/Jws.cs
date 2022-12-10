@@ -23,11 +23,16 @@ public class Jws
     private string GenerateJwt()
     {
         var handler = new JsonWebTokenHandler();
+        var now = DateTime.UtcNow;
+
         return handler.CreateToken(new SecurityTokenDescriptor
         {
             Issuer = "me",
             Audience = "you",
-            Expires = DateTime.UtcNow.AddDays(1),
+            IssuedAt = now,
+            NotBefore = now,
+            Expires = now.AddMinutes(5),
+            Claims = new Dictionary<string, object> { { "sub", "336f0f1e54b7406e9bc693efa57a9f6a" } },
             SigningCredentials = new SigningCredentials(new RsaSecurityKey(privateKey), "RS256")
         });
     }
@@ -35,20 +40,20 @@ public class Jws
     private bool ValidateJwt(string jwt)
     {
         var handler = new JsonWebTokenHandler();
-        var result = handler.ValidateToken(jwt, new TokenValidationParameters
+        TokenValidationResult result = handler.ValidateToken(jwt, new TokenValidationParameters
         {
             ValidIssuer = "me",
             ValidAudience = "you",
             IssuerSigningKey = new RsaSecurityKey(publicKey)
         });
-
+        
         return result.IsValid;
     }
 
     private static IEnumerable<Claim> DecodeJwt(string jwt)
     {
         var handler = new JsonWebTokenHandler();
-        var token = handler.ReadJsonWebToken(jwt);
+        JsonWebToken token = handler.ReadJsonWebToken(jwt);
         return token.Claims;
     }
 
