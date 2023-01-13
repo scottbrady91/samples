@@ -13,22 +13,7 @@ public class EfCoreInMemory
         builder.UseInMemoryDatabase("test_db");
         DbContextOptions<TestDbContext> options = builder.Options;
 
-        var testEntity = new TestEntity { Id = 1, Name = "Test Entity" };
-
-        await using (var context = new TestDbContext(options))
-        {
-            context.TestEntities.Add(testEntity);
-            await context.SaveChangesAsync();
-        }
-
-        TestEntity foundEntity;
-        await using (var context = new TestDbContext(options))
-        {
-            foundEntity = await context.TestEntities.FirstOrDefaultAsync(x => x.Id == testEntity.Id);
-        }
-
-        Assert.NotNull(foundEntity);
-        Assert.Equal(testEntity.Name, foundEntity.Name);
+        await DatabaseTest(options);
     }
 
     [Fact]
@@ -48,6 +33,11 @@ public class EfCoreInMemory
             await context.Database.EnsureCreatedAsync();
         }
 
+        await DatabaseTest(options);
+    }
+
+    private async Task DatabaseTest(DbContextOptions<TestDbContext> options)
+    {
         var testEntity = new TestEntity { Id = 1, Name = "Test Entity" };
 
         await using (var context = new TestDbContext(options))
