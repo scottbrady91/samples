@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Jwe", "..\Jwe\Jwe.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScottBrady.Samples.Jwt", "..\Jws\ScottBrady.Samples.Jwt\ScottBrady.Samples.Jwt.csproj", "{A53081DE-05CF-48A1-A35A-31945AD8D4B0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EfCoreInMemory", "..\EntityFrameworkCoreInMemoryTesting\EfCoreInMemory.csproj", "{725E150D-9E48-4F48-B940-ACFCFC07C68F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,17 @@ Global
 		{A53081DE-05CF-48A1-A35A-31945AD8D4B0}.Release|x64.Build.0 = Release|Any CPU
 		{A53081DE-05CF-48A1-A35A-31945AD8D4B0}.Release|x86.ActiveCfg = Release|Any CPU
 		{A53081DE-05CF-48A1-A35A-31945AD8D4B0}.Release|x86.Build.0 = Release|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Debug|x64.Build.0 = Debug|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Debug|x86.Build.0 = Debug|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Release|x64.ActiveCfg = Release|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Release|x64.Build.0 = Release|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Release|x86.ActiveCfg = Release|Any CPU
+		{725E150D-9E48-4F48-B940-ACFCFC07C68F}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
