@@ -28,6 +28,11 @@ jobs:
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '6.0.x'
+        dotnet-version: '5.0.x'
+    - name: Setup .NET 7.0
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '7.0.x'
     - name: Fix Windows VM bug
       shell: bash
       if: matrix.os == 'windows-latest'
