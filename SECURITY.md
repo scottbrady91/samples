@@ -1,5 +1,4 @@
 # Security Policy
 
-If you discover a security issue in this library, please report it to scott@scottbrady91.com.
-
-Responsible disclosure allows me to publish a fix before the vulnerability is made public.
+If you find any security issues on this website, one of my articles, or one of my open-source projects, please practice [responsible disclosure](https://en.wikipedia.org/wiki/Responsible_disclosure) by privately contacting me at scott@scottbrady91.com.
+I ask that you show some common decency and empathy by contacting me before taking up arms on social media or attempting to create a CVE.
