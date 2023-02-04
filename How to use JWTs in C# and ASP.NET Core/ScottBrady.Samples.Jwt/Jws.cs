@@ -33,7 +33,7 @@ public class Jws
             NotBefore = now,
             Expires = now.AddMinutes(5),
             Claims = new Dictionary<string, object> { { "sub", "336f0f1e54b7406e9bc693efa57a9f6a" } },
-            SigningCredentials = new SigningCredentials(new RsaSecurityKey(privateKey), "RS256")
+            SigningCredentials = new SigningCredentials(new RsaSecurityKey(privateKey) {KeyId = "efb4e66d8ca343d99afc26826cc74f48"}, "RS256")
         });
     }
 
