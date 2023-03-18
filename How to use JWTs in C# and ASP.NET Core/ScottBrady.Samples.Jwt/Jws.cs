@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Xunit;
@@ -10,14 +11,28 @@ namespace ScottBrady.Samples.Jwt;
 
 public class Jws
 {
-    private readonly RSA privateKey;
-    private readonly RSA publicKey;
+    private const string KeyId = "efb4e66d8ca343d99afc26826cc74f48";
+    private readonly SecurityKey privateKey;
+    private readonly SecurityKey publicKey;
     
     public Jws()
     {
         // create test key (private key & corresponding public key)
-        privateKey = RSA.Create(3072);
-        publicKey = RSA.Create(privateKey.ExportParameters(false));
+        var key = RSA.Create(3072);
+
+        // or load from disk (e.g. PEM file)
+        // key.ImportFromPem(System.IO.File.ReadAllText("example.pem"));
+
+        // or load from certificate
+        // key = new X509Certificate2("example.pfx").GetRSAPrivateKey();
+
+        privateKey = new RsaSecurityKey(key) { KeyId = KeyId };
+        
+        // alternatively, use X509SecurityKey, which will set the x5t header using the certificate's hash
+        // privateKey = new X509SecurityKey(new X509Certificate2("example.pfx"), KeyId);
+        
+        // load only public key
+        publicKey = new RsaSecurityKey(key.ExportParameters(includePrivateParameters: false)) { KeyId = KeyId };
     }
 
     private string GenerateJwt()
@@ -33,7 +48,7 @@ public class Jws
             NotBefore = now,
             Expires = now.AddMinutes(5),
             Claims = new Dictionary<string, object> { { "sub", "336f0f1e54b7406e9bc693efa57a9f6a" } },
-            SigningCredentials = new SigningCredentials(new RsaSecurityKey(privateKey) {KeyId = "efb4e66d8ca343d99afc26826cc74f48"}, "RS256")
+            SigningCredentials = new SigningCredentials(privateKey, "RS256")
         });
     }
 
@@ -44,7 +59,7 @@ public class Jws
         {
             ValidIssuer = "me",
             ValidAudience = "you",
-            IssuerSigningKey = new RsaSecurityKey(publicKey)
+            IssuerSigningKey = publicKey
         });
         
         return result.IsValid;
