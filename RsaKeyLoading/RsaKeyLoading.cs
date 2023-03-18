@@ -16,8 +16,7 @@ namespace RsaKeyLoading
         [Fact]
         public void CreateNewKey()
         {
-            var key = RSA.Create(3072);
-
+            using var key = RSA.Create(3072);
             Verify(key);
         }
 
@@ -63,8 +62,7 @@ namespace RsaKeyLoading
                 InverseQ = Base64UrlEncoder.DecodeBytes("gTOcxTsCHkDuDxsePtg0cG40TKBwc72DDsGBJK1OBVVOLT7llQvMwWtRmiXtrkJLNtjSpvKN7taDy3gZQPwrJnUCL5w10orpNkU5-8_nK2tBp4kL7okuGMzr185Vh55NTCtLW02itqBm-_oMjG7CQ_92vQ7xH5BP56whX7naUGrmIqmDbf7cYwLAGf8GywRstrorzug9RHvQMYsiUqWfTY57rmxEH3ZIw-bJ5a2Pkmzb31qCXcX9uc-H0uLXCFLP")
             };
 
-            var key = RSA.Create(rsaParameters);
-            
+            using var key = RSA.Create(rsaParameters);
             Verify(key);
         }
 
@@ -106,8 +104,21 @@ namespace RsaKeyLoading
                 InverseQ = Base64UrlEncoder.DecodeBytes(jsonWebKey.QI)
             };
 
-            var key = RSA.Create(rsaParameters);
+            using var key = RSA.Create(rsaParameters);
+            Verify(key);
+        }
+
+        [Fact]
+        public void LoadFromPem()
+        {
+            using var key = RSA.Create();
+
+            // PKCS#1 (BEGIN RSA PRIVATE KEY) $openssl genrsa -out key-pkcs1.pem 3072)
+            key.ImportFromPem(File.ReadAllText("key-pkcs1.pem"));
+            Verify(key);
             
+            // PKCS#8 (BEGIN PRIVATE KEY) $openssl genpkey -algorithm RSA -out key-pkcs8.pem -pkeyopt rsa_keygen_bits:3072
+            key.ImportFromPem(File.ReadAllText("key-pkcs8.pem"));
             Verify(key);
         }
 
@@ -118,26 +129,10 @@ namespace RsaKeyLoading
             X509Certificate2 cert = new CertificateRequest("cn=Test", RSA.Create(3072), HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1)
                 .CreateSelfSigned(DateTime.UtcNow.AddDays(-2), DateTime.UtcNow.AddDays(2));
 
-            var key = cert.GetRSAPrivateKey();
+            using var key = cert.GetRSAPrivateKey();
             // var publicKey = cert.GetRSAPublicKey();
-
             Verify(key);
         }
-
-        [Fact]
-        public void LoadFromPem()
-        {
-            var key = RSA.Create();
-            
-            // PKCS#1 (BEGIN RSA PRIVATE KEY) $openssl genrsa -out key-pkcs1.pem 3072)
-            key.ImportFromPem(File.ReadAllText("key-pkcs1.pem"));
-            Verify(key);
-            
-            // PKCS#8 (BEGIN PRIVATE KEY) $openssl genpkey -algorithm RSA -out key-pkcs8.pem -pkeyopt rsa_keygen_bits:3072
-            key.ImportFromPem(File.ReadAllText("key-pkcs8.pem"));
-            Verify(key);
-        }
-        
         
         private void Verify(RSA key)
         {
