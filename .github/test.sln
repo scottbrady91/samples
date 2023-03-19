@@ -13,7 +13,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EfCoreInMemory", "..\Entity
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ScottBrady.Samples.Jwt", "..\How to use JWTs in C# and ASP.NET Core\ScottBrady.Samples.Jwt\ScottBrady.Samples.Jwt.csproj", "{C966EF31-D768-4CD5-A92F-8EA569009B89}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RsaKeyLoading", "..\RsaKeyLoading\RsaKeyLoading.csproj", "{7CA1F9F5-22C3-4BB0-91B1-3B34CF0290C4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RsaKeyLoading", "..\Loading RSA Keys in .NET\RsaKeyLoading.csproj", "{7CA1F9F5-22C3-4BB0-91B1-3B34CF0290C4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
