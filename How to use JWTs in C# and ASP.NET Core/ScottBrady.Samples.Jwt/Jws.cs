@@ -85,4 +85,33 @@ public class Jws
         // validate
         Assert.True(ValidateJwt(jwt));
     }
+
+    [Fact]
+    public void GenerateAndValidateSymmetricJwt()
+    {
+        var secretKey = RandomNumberGenerator.GetBytes(32);
+
+        var handler = new JsonWebTokenHandler();
+        var now = DateTime.UtcNow;
+
+        var jwt = handler.CreateToken(new SecurityTokenDescriptor
+        {
+            Issuer = "me",
+            Audience = "you",
+            IssuedAt = now,
+            NotBefore = now,
+            Expires = now.AddMinutes(5),
+            Claims = new Dictionary<string, object> { { "sub", "336f0f1e54b7406e9bc693efa57a9f6a" } },
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(secretKey), "HS256")
+        });
+        
+        var result = handler.ValidateToken(jwt, new TokenValidationParameters
+        {
+            ValidIssuer = "me",
+            ValidAudience = "you",
+            IssuerSigningKey = new SymmetricSecurityKey(secretKey)
+        });
+
+        Assert.True(result.IsValid);
+    }
 }
